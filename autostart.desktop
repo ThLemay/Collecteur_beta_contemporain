@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Nut script
+Exec=/home/bluegriot/Desktop/0117-NUT/0117-NUT-Firmware/firmware/launch_demo_with_logs.sh
+X-GNOME-Autostart-enabled=true

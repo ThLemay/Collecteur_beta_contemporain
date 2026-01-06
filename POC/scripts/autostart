@@ -1,0 +1,4 @@
+@lxpanel --profile LXDE-pi
+@pcmanfm --desktop --profile LXDE-pi
+@xscreensaver -no-spash
+@/home/bluegriot/Desktop/0117-NUT/git/0117-NUT-Firmware/scripts/launch_demo_with_logs.sh
