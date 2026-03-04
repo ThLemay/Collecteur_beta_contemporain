@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 """
-NUT - GUI Tkinter (3 �crans)
+NUT - GUI Tkinter (3 écrans)
 
-1) Accueil : logo + bouton "D�marrer la reconnaissance"
-2) Reconnaissance : flux cam�ra + infos (dimensions / salissure / statut)
-3) Merci : message + retour auto � l'accueil
+1) Accueil : logo + bouton "Démarrer la reconnaissance"
+2) Reconnaissance : flux caméra + infos (dimensions / salissure / statut)
+3) Merci : message + retour auto à l'accueil
 
-D�pendances (Raspberry / Linux):
+Dépendances (Raspberry / Linux):
   sudo apt-get install -y python3-tk
   pip install pillow
 
@@ -41,7 +41,7 @@ import fork
 
 
 FILE_OBJECT_ORDER_NAME = "awaiting_object_list.txt"
-WAITING_VALIDATION_DELAY_S = 0.3  # validation si d�tect� en continu X secondes
+WAITING_VALIDATION_DELAY_S = 0.3  # validation si détecté en continu X secondes
 
 
 def waiting_list_read_file(file_path: str) -> list[int]:
@@ -51,23 +51,23 @@ def waiting_list_read_file(file_path: str) -> list[int]:
 
 @dataclass
 class UiDetectionState:
-    status: str = "En attente�"
+    status: str = "En attente..."
     expected_id: Optional[int] = None
     detected_id: Optional[int] = None
     size_label: str = "-"      # si tu as un mapping ID->XS/S/M/L tu le mets ici
     dim_cm: str = "-"
     dim_px: str = "-"
-    dirt: str = "-"            # ton coef salissure (d�j� calcul�) => containerInfo.colorDelta
+    dirt: str = "-"            # ton coef salissure (déjà calculé) => containerInfo.colorDelta
     error: str = "-"
 
 
 class CameraWorker(threading.Thread):
     """
-    Thread cam�ra/d�tection pour �viter de bloquer l'UI.
+    Thread caméra/détection pour éviter de bloquer l'UI.
     Il produit :
-      - latest_frame_bgr : frame analys�e (retour find_contours)
+      - latest_frame_bgr : frame analysée (retour find_contours)
       - latest_info : containerInfo_t
-      - ui_state : infos d�j� format�es pour l'IHM
+      - ui_state : infos déjà formatées pour l'IHM
     """
     def __init__(self, *, calibration: bool, enable_motor: bool):
         super().__init__(daemon=True)
@@ -101,7 +101,7 @@ class CameraWorker(threading.Thread):
             return self.latest_frame_bgr, self.latest_info, state, self.running
 
     def _dump_container(self) -> None:
-        # Reprend votre s�quence main.py
+        # Reprend votre séquence main.py
         if trapdoor.smart_close():
             print("Error when closing the trapdoor")
         if fork.dumpLeft():
@@ -148,27 +148,27 @@ class CameraWorker(threading.Thread):
     def _process_waiting_logic(self, info: containerInfo_t) -> None:
         exp_id = camera.s_waitingOrderArr[camera.s_waitingIndex]
 
-        # pas de contenant d�tect�
+        # pas de contenant détecté
         if info.id == -1:
             if self._update_disp_once:
-                self.ui_state.status = f"En attente du contenant {exp_id}�"
+                self.ui_state.status = f"En attente du contenant {exp_id}..."
                 self._update_disp_once = False
             self._match_start_ts = 0.0
             return
 
-        # contenant d�tect�
+        # contenant détecté
         self._update_disp_once = True
 
         if (info.id == exp_id) and (info.error == containerErrorCode.VALID):
             if self._match_start_ts == 0.0:
                 self._match_start_ts = time.time()
-                self.ui_state.status = f"Contenant {info.id} d�tect� (validation�)"
+                self.ui_state.status = f"Contenant {info.id} détecté (validation)"
                 return
 
             if (time.time() - self._match_start_ts) >= WAITING_VALIDATION_DELAY_S:
-                self.ui_state.status = "Validation OK � �jection�"
+                self.ui_state.status = "Validation OK à l'éjection"
 
-                # action m�canique (dans le thread, UI reste fluide)
+                # action mécanique (dans le thread, UI reste fluide)
                 if self.enable_motor:
                     self._dump_container()
                 else:
@@ -179,7 +179,7 @@ class CameraWorker(threading.Thread):
                 if camera.s_waitingIndex >= len(camera.s_waitingOrderArr):
                     camera.s_waitingIndex = 0
 
-                self.ui_state.status = "Termin�"
+                self.ui_state.status = "Terminé"
                 self.running = False
                 self._match_start_ts = 0.0
                 return
@@ -189,7 +189,7 @@ class CameraWorker(threading.Thread):
             self._match_start_ts = 0.0
 
     def run(self) -> None:
-        # Init s�curit�
+        # Init sécurité
         if self.enable_motor:
             try:
                 fork.center()
@@ -215,7 +215,7 @@ class CameraWorker(threading.Thread):
 
             except Exception as e:
                 with self._lock:
-                    self.ui_state.status = f"Erreur cam�ra: {e}"
+                    self.ui_state.status = f"Erreur caméra: {e}"
                 time.sleep(0.1)
 
         # Cleanup
@@ -235,7 +235,7 @@ class NutApp(tk.Tk):
         self.worker = worker
         self.return_delay_ms = return_delay_ms
 
-        self.title("NUT � Reconnaissance contenants")
+        self.title("NUT - Reconnaissance contenants")
         self.geometry("1100x700")
         self.minsize(900, 600)
 
@@ -311,13 +311,13 @@ class HomeFrame(ttk.Frame):
         ttk.Label(wrap, text="NUT", font=("Helvetica", 56, "bold")).grid(row=0, column=0, pady=(80, 10))
         ttk.Label(wrap, text="Interface de reconnaissance de contenants", font=("Helvetica", 16)).grid(row=1, column=0, pady=(0, 30))
 
-        ttk.Button(wrap, text="D�marrer la reconnaissance", command=self.app.start_scan).grid(row=2, column=0, pady=10, ipadx=15, ipady=10)
+        ttk.Button(wrap, text="Démarrer la reconnaissance", command=self.app.start_scan).grid(row=2, column=0, pady=10, ipadx=15, ipady=10)
 
         self.status = ttk.Label(wrap, text="", font=("Helvetica", 11))
         self.status.grid(row=3, column=0, pady=(30, 0))
 
     def on_show(self):
-        self.status.configure(text="Pr�t. Placez un contenant puis cliquez sur D�marrer.")
+        self.status.configure(text="Prêt. Placez un contenant puis cliquez sur Démarrer.")
 
 
 class ScanFrame(ttk.Frame):
@@ -341,7 +341,7 @@ class ScanFrame(ttk.Frame):
         self.lbl_status.grid(row=0, column=0, sticky="ew", pady=(0, 20))
 
         self._kv(side, 1, "Contenant attendu", "expected")
-        self._kv(side, 2, "D�tect�", "detected")
+        self._kv(side, 2, "Détecté", "detected")
         self._kv(side, 3, "Taille", "size")
         self._kv(side, 4, "Dimensions (cm)", "dim_cm")
         self._kv(side, 5, "Dimensions (px)", "dim_px")
@@ -420,7 +420,7 @@ class ScanFrame(ttk.Frame):
         self.val_error.configure(text=state.error)
 
         # transition vers Merci
-        if (not running) and state.status == "Termin�":
+        if (not running) and state.status == "Terminé":
             self._stop_tick()
             self.app.scan_done()
             return
@@ -443,12 +443,12 @@ class ThanksFrame(ttk.Frame):
         ttk.Label(wrap, text="Merci !", font=("Helvetica", 48, "bold")).grid(row=0, column=0, pady=(140, 10))
         ttk.Label(
             wrap,
-            text="Votre contenant a �t� analys�.\nVous pouvez en pr�senter un nouveau.",
+            text="Votre contenant a été analysé.\nVous pouvez en présenter un nouveau.",
             font=("Helvetica", 16),
             justify="center",
         ).grid(row=1, column=0, pady=(0, 30))
 
-        self.hint = ttk.Label(wrap, text="Retour � l'accueil�", font=("Helvetica", 12))
+        self.hint = ttk.Label(wrap, text="Retour à l'accueil", font=("Helvetica", 12))
         self.hint.grid(row=2, column=0)
 
         self._job = None
@@ -469,7 +469,7 @@ class ThanksFrame(ttk.Frame):
 def main():
     ap = argparse.ArgumentParser(description="NUT GUI Tkinter")
     ap.add_argument("-c", "--calibration", action="store_true", help="Mode calibration (pas de dump).")
-    ap.add_argument("--no-motor", action="store_true", help="D�sactive les moteurs (simulation).")
+    ap.add_argument("--no-motor", action="store_true", help="Désactive les moteurs (simulation).")
     args = ap.parse_args()
 
     calibration = bool(args.calibration)

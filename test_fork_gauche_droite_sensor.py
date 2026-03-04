@@ -15,7 +15,7 @@ def dump_left_and_return_center():
 
     print("⬅️ Retour au centre (tempo)")
     fork._backward(0.18)
-    sleep(1.37)
+    sleep(1.30)
     fork.stop()
     print("✅ Centre estimé depuis la gauche")
 
@@ -38,7 +38,7 @@ def dump_right_and_return_center():
 
     print("⬅️ Retour au centre (tempo)")
     fork._forward(0.18)
-    sleep(1.35)
+    sleep(1.30)
     fork.stop()
     print("✅ Centre estimé depuis la droite")
 
